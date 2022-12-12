@@ -29,17 +29,21 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   /**************************************************************************** */
   app.get( "/filteredimage", async ( req: Request, res: Response ) => {
-    const {image_url} = req.query
+    const {image_url}  = req.query
     if(!image_url){
-      return res.status(404).json({message:"image_url not found"})
+      return res.status(401).json({message:"image_url not found"})
     }
-    const filteredpath: string = await filterImageFromURL(image_url);  
-    
-    res.sendFile(filteredpath);
-
-    res.on('finish',()=>{
-      deleteLocalFiles([path.resolve(filteredpath)])
-  })
+    try {
+      const filteredpath: string = await filterImageFromURL(image_url);  
+      
+      res.sendFile(filteredpath);
+      
+      res.on('finish',()=>{
+        deleteLocalFiles([path.resolve(filteredpath)])
+      })
+    } catch (error) {
+      res.status(422).json({error:"wrong image url"})
+    }
   });
   
   //! END @TODO1
